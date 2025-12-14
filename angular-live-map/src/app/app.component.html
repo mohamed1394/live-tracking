@@ -1,0 +1,17 @@
+<main>
+  <header class="topbar">
+    <h1>{{ title }}</h1>
+    <div class="status">
+      <span class="pill" [class.ok]="(status$ | async) === 'connected'">
+        Status: {{ status$ | async }}
+      </span>
+      <ng-container *ngIf="lastMessage$ | async as last">
+        <span class="pill pill-muted">
+          Last: {{ last.agentId }} @ {{ last.lat }}, {{ last.lng }}
+        </span>
+      </ng-container>
+    </div>
+  </header>
+  <div id="map"></div>
+</main>
+
