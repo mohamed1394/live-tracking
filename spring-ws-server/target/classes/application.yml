@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: spring-ws-server
+
+logging:
+  level:
+    com.example.live: INFO
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+    root: INFO
+

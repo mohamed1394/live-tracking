@@ -1,0 +1,4 @@
+com\example\live\LiveTrackingApplication.class
+com\example\live\config\WebSocketConfig.class
+com\example\live\controller\CoordinateController.class
+com\example\live\model\CoordinateMessage.class
