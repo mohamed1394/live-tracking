@@ -1,0 +1,45 @@
+<main>
+  <header class="topbar">
+    <h1>{{ title }}</h1>
+    <div class="status">
+      <span class="pill" [class.ok]="(status$ | async) === 'connected'">
+        Status: {{ status$ | async }}
+      </span>
+    </div>
+  </header>
+  
+  <div class="test-container">
+    <div class="test-panel">
+      <h2>WebSocket Connection Test</h2>
+      
+      <div class="button-group">
+        <button class="test-button" (click)="startStreaming()" [disabled]="(status$ | async) !== 'connected'">
+          <span *ngIf="!isStreaming">🚀 Start Streaming (3 min)</span>
+          <span *ngIf="isStreaming">⏹️ Stop Streaming</span>
+        </button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">Sent:</span>
+          <span class="stat-value">{{ sentCount }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Received:</span>
+          <span class="stat-value">{{ receivedCount }}</span>
+        </div>
+      </div>
+
+      <div class="last-message" *ngIf="lastMessage$ | async as last">
+        <h3>Last Received Message:</h3>
+        <div class="message-details">
+          <p><strong>Agent ID:</strong> {{ last.agentId }}</p>
+          <p><strong>Latitude:</strong> {{ last.lat | number:'1.6-6' }}</p>
+          <p><strong>Longitude:</strong> {{ last.lng | number:'1.6-6' }}</p>
+          <p><strong>Timestamp:</strong> {{ last.timestamp | date:'medium' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
