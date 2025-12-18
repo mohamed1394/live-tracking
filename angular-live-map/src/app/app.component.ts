@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import * as L from 'leaflet';
 import { Subscription } from 'rxjs';
 import { CoordinateMessage } from './coordinate-message';
 import { LiveCoordsService } from './live-coords.service';
@@ -11,15 +10,9 @@ import { LiveCoordsService } from './live-coords.service';
 })
 export class AppComponent implements AfterViewInit, OnDestroy {
   title = 'Live Map';
-  private map?: L.Map;
-  private markers = new Map<string, L.Marker>();
+  private map?: google.maps.Map;
+  private markers = new Map<string, google.maps.Marker>();
   private sub?: Subscription;
-  private carIcon = L.divIcon({
-    html: '🚗',
-    className: 'car-marker',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
-  });
 
   constructor(private liveCoords: LiveCoordsService) {}
 
@@ -32,15 +25,15 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.map = L.map('map', {
-      center: [30.0444, 31.2357], // Cairo
-      zoom: 12
-    });
+    // Initialize Google Map
+    const mapElement = document.getElementById('map');
+    if (!mapElement) return;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(this.map);
+    this.map = new google.maps.Map(mapElement, {
+      center: { lat: 30.0444, lng: 31.2357 }, // Cairo
+      zoom: 12,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
 
     // Add a default car marker in Cairo so the map is not empty.
     this.addOrUpdateMarker({
@@ -55,7 +48,6 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
-    this.map?.remove();
   }
 
   private addOrUpdateMarker(msg: CoordinateMessage): void {
@@ -63,14 +55,29 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     let marker = this.markers.get(msg.agentId);
     if (!marker) {
-      marker = L.marker([msg.lat, msg.lng], { icon: this.carIcon });
-      marker.addTo(this.map);
+      // Create new marker with car emoji
+      marker = new google.maps.Marker({
+        position: { lat: msg.lat, lng: msg.lng },
+        map: this.map,
+        title: msg.agentId,
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+              <text x="15" y="20" font-size="24" text-anchor="middle">🚗</text>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(30, 30),
+          anchor: new google.maps.Point(15, 15)
+        }
+      });
       this.markers.set(msg.agentId, marker);
     } else {
-      marker.setLatLng([msg.lat, msg.lng]);
+      // Update existing marker position
+      marker.setPosition({ lat: msg.lat, lng: msg.lng });
     }
 
-    this.map.panTo([msg.lat, msg.lng], { animate: true });
+    // Pan map to marker position
+    this.map.panTo({ lat: msg.lat, lng: msg.lng });
   }
 }
 
